@@ -1,29 +1,28 @@
 #!/usr/bin/python3
+"""
+Script that starts a Flask web application
+/states_list: display a HTML page: (inside the tag BODY) 
+"""
 from flask import Flask, render_template
-from models import storage
-from models.state import State
-
+from models import storage, State
 
 app = Flask(__name__)
+app.url_map.strict_slashes = False
 
 
 @app.teardown_appcontext
-def tear_down(self):
-    """tear down app context"""
+def close_context(exception):
     storage.close()
 
 
-@app.route('/states_list', strict_slashes=False)
-def list_states():
-    """lists states from database
-    Returns:
-        HTML
-    """
-    dict_states = storage.all(State)
+@app.route('/states_list')
+def states_route():
+    states = storage.all(State)
     all_states = []
-    for k, v in dict_states.items():
-        all_states.append(v)
-    return render_template('7-states_list.html', all_states=all_states)
+
+    for state in states.values():
+        all_states.append([state.id, state.name])
+    return render_template('7-states_list.html', states=all_states)
 
 
 if __name__ == "__main__":

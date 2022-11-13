@@ -1,18 +1,17 @@
 #!/usr/bin/python3
-"""class Flask"""
+"""
+Script that starts a Flask web application
+and displays “Hello HBNB!” at /
+"""
 from flask import Flask
-"""class Flask"""
-
 
 app = Flask(__name__)
 
 
 @app.route('/', strict_slashes=False)
-def hello_hbnb():
-    """displays text
-    Returns:
-        text
-    """
+def hello():
+
+    # display “Hello HBNB!”
     return "Hello HBNB!"
 
 

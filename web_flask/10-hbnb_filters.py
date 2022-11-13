@@ -1,37 +1,47 @@
 #!/usr/bin/python3
+"""
+    Starts a flask web application listening on 0.0.0.0, port 5000
+    and displays the results of states and amenities to a web page
+    via "/hbnb_filters" route
+"""
 from flask import Flask, render_template
-from models import storage
-from models.state import State
-from models.city import City
-from models.amenity import Amenity
-
+from models import storage, State, Amenity
 
 app = Flask(__name__)
+app.url_map.strict_slashes = False
 
 
 @app.teardown_appcontext
-def tear_down(self):
-    """tear down app context"""
+def close_context(exception):
+    """
+        These functions are typically also called when the request
+        context is popped.
+    """
     storage.close()
 
 
-@app.route('/hbnb_filters', strict_slashes=False)
-def show_page():
-    """displays webpage
-    Returns:
-        HTML
+@app.route("/hbnb_filters")
+def states_cities_route():
     """
-    dict_states = storage.all(State)
-    dict_amenities = storage.all(Amenity)
+        Route that fetches all cities in a stage
+        from the storage engine
+    """
+    states = storage.all(State)
+    amenities = storage.all(Amenity)
     all_states = []
     all_amenities = []
 
-    for k, v in dict_states.items():
-        all_states.append(v)
-    for k, v in dict_amenities.items():
-        all_amenities.append(v)
-    return render_template('10-hbnb_filters.html', all_states=all_states,
-                           all_amenities=all_amenities)
+    for state in states.values():
+        cities = state.cities
+        cities_list = list(filter(lambda x: x.state_id == state.id, cities))
+        c_data = list(map(lambda x: [x.id, x.name], cities_list))
+        all_states.append([state.id, state.name, c_data])
+    for amenity in amenities.values():
+        all_amenities.append([amenity.id, amenity.name])
+
+    return render_template("10-hbnb_filters.html", states=all_states,
+                           amenities=all_amenities
+                           )
 
 
 if __name__ == "__main__":
